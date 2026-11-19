@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小宇宙播客检索</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; background: #f6f7f9; color: #222; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+  h1 { font-size: 22px; margin: 8px 0 4px; }
+  .sub { color: #666; font-size: 14px; margin: 0 0 16px; }
+  #search { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 1px solid #d5d8de; border-radius: 10px; outline: none; }
+  #search:focus { border-color: #7c5cff; }
+  .note { background: #fff7e6; border: 1px solid #ffe1a8; color: #8a6100; font-size: 13px; border-radius: 10px; padding: 10px 12px; margin: 14px 0; }
+  .card { display: block; background: #fff; border: 1px solid #e6e8ee; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; text-decoration: none; color: inherit; }
+  .card:hover { border-color: #7c5cff; }
+  .podcast { font-size: 13px; color: #7c5cff; margin-bottom: 4px; }
+  .title { font-size: 16px; font-weight: 600; line-height: 1.45; }
+  .date { font-size: 13px; color: #888; margin-top: 6px; }
+  #empty { color: #888; text-align: center; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎙️ 小宇宙播客检索</h1>
+  <p class="sub">搜索近期播客节目，点击任意一期，跳转到小宇宙收听。</p>
+
+  <input id="search" type="text" placeholder="输入播客名或单集标题里的关键词…">
+
+  <div class="note">⚠️ 当前列表里是示例数据，只为演示页面长什么样；选定第一批播客后，这里会换成真实节目。</div>
+
+  <div id="list"></div>
+  <p id="empty" style="display:none">没有找到匹配的节目，换个关键词试试。</p>
+</div>
+
+<script>
+// EPISODES（节目列表）：每一期是一条数据
+// podcast（播客名）、title（单集标题）、date（发布日期）、url（小宇宙播放页链接）
+const EPISODES = [
+  { podcast: "示例播客·生活故事", title: "示例单集：这是一期演示用的节目（一）", date: "2026-11-18", url: "https://www.xiaoyuzhoufm.com" },
+  { podcast: "示例播客·生活故事", title: "示例单集：这是一期演示用的节目（二）", date: "2026-11-15", url: "https://www.xiaoyuzhoufm.com" },
+  { podcast: "示例播客·随便聊聊", title: "示例单集：演示搜索功能用的节目", date: "2026-11-12", url: "https://www.xiaoyuzhoufm.com" }
+];
+
+const list = document.getElementById("list");     // getElementById（按名字找到页面上的部件）
+const search = document.getElementById("search");
+
+// function（函数）render（渲染）：把符合关键词的节目画到页面上
+function render(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  // filter（筛选）：只留下播客名或标题里包含关键词的节目
+  const matched = EPISODES.filter(ep => (ep.podcast + ep.title).toLowerCase().includes(kw));
+  list.innerHTML = matched.map(ep => `
+    <a class="card" href="${ep.url}" target="_blank" rel="noopener">
+      <div class="podcast">${ep.podcast}</div>
+      <div class="title">${ep.title}</div>
+      <div class="date">${ep.date} · 点击去小宇宙收听 →</div>
+    </a>`).join("");
+  document.getElementById("empty").style.display = matched.length ? "none" : "block";
+}
+
+// 给搜索框绑一个 input（输入）事件：每打一个字，就重新筛选一次
+search.addEventListener("input", () => render(search.value));
+
+// 打开页面时先把全部节目画出来
+render("");
+</script>
+</body>
+</html>
