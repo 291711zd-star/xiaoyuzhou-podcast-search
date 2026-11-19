@@ -11,36 +11,38 @@
   .sub { color: #666; font-size: 14px; margin: 0 0 16px; }
   #search { width: 100%; box-sizing: border-box; padding: 12px 14px; font-size: 16px; border: 1px solid #d5d8de; border-radius: 10px; outline: none; }
   #search:focus { border-color: #7c5cff; }
-  .note { background: #fff7e6; border: 1px solid #ffe1a8; color: #8a6100; font-size: 13px; border-radius: 10px; padding: 10px 12px; margin: 14px 0; }
+  .note { background: #eef4ff; border: 1px solid #c9dcff; color: #33507e; font-size: 13px; border-radius: 10px; padding: 10px 12px; margin: 14px 0; line-height: 1.6; }
   .card { display: block; background: #fff; border: 1px solid #e6e8ee; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; text-decoration: none; color: inherit; }
   .card:hover { border-color: #7c5cff; }
   .podcast { font-size: 13px; color: #7c5cff; margin-bottom: 4px; }
+  .rank { display: inline-block; background: #7c5cff; color: #fff; font-size: 12px; border-radius: 6px; padding: 1px 7px; margin-right: 6px; vertical-align: 1px; }
   .title { font-size: 16px; font-weight: 600; line-height: 1.45; }
-  .date { font-size: 13px; color: #888; margin-top: 6px; }
+  .go { font-size: 13px; color: #888; margin-top: 6px; }
   #empty { color: #888; text-align: center; margin-top: 32px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>🎙️ 小宇宙播客检索</h1>
-  <p class="sub">搜索近期播客节目，点击任意一期，跳转到小宇宙收听。</p>
+  <p class="sub">小宇宙近期热门单集 Top 50，搜索后点击任意一期，跳转到小宇宙收听。</p>
 
   <input id="search" type="text" placeholder="输入播客名或单集标题里的关键词…">
 
-  <div class="note">⚠️ 当前列表里是示例数据，只为演示页面长什么样；选定第一批播客后，这里会换成真实节目。</div>
+  <div class="note" id="source-note">数据来源：「播客良品铺子」播客周榜（按播放量排序，非官方整理）。</div>
 
   <div id="list"></div>
   <p id="empty" style="display:none">没有找到匹配的节目，换个关键词试试。</p>
 </div>
 
+<!-- 节目数据在 data.js 里，由 scrape_chart.py（抓取脚本）自动生成 -->
+<script src="data.js"></script>
 <script>
-// EPISODES（节目列表）：每一期是一条数据
-// podcast（播客名）、title（单集标题）、date（发布日期）、url（小宇宙播放页链接）
-const EPISODES = [
-  { podcast: "示例播客·生活故事", title: "示例单集：这是一期演示用的节目（一）", date: "2026-11-18", url: "https://www.xiaoyuzhoufm.com" },
-  { podcast: "示例播客·生活故事", title: "示例单集：这是一期演示用的节目（二）", date: "2026-11-15", url: "https://www.xiaoyuzhoufm.com" },
-  { podcast: "示例播客·随便聊聊", title: "示例单集：演示搜索功能用的节目", date: "2026-11-12", url: "https://www.xiaoyuzhoufm.com" }
-];
+// 数据来源说明：从 CHART_META（榜单信息）里拼出来，写到页面上
+if (typeof CHART_META !== "undefined") {
+  document.getElementById("source-note").textContent =
+    "数据来源：「播客良品铺子」播客周榜第 " + CHART_META.issue + " 期（" + CHART_META.period +
+    "），按播放量排序，非官方整理；榜单发布于 " + CHART_META.published + "。";
+}
 
 const list = document.getElementById("list");     // getElementById（按名字找到页面上的部件）
 const search = document.getElementById("search");
@@ -52,9 +54,9 @@ function render(keyword) {
   const matched = EPISODES.filter(ep => (ep.podcast + ep.title).toLowerCase().includes(kw));
   list.innerHTML = matched.map(ep => `
     <a class="card" href="${ep.url}" target="_blank" rel="noopener">
-      <div class="podcast">${ep.podcast}</div>
+      <div class="podcast"><span class="rank">第 ${ep.rank} 名</span>${ep.podcast}</div>
       <div class="title">${ep.title}</div>
-      <div class="date">${ep.date} · 点击去小宇宙收听 →</div>
+      <div class="go">点击去小宇宙收听 →</div>
     </a>`).join("");
   document.getElementById("empty").style.display = matched.length ? "none" : "block";
 }
